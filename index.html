@@ -1,223 +1,71 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Armchair Fantasy Experts</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      background-color: #111;
-      color: #FFD700;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #000;
-      padding: 20px;
-      text-align: center;
-      border-bottom: 2px solid #FFD700;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2.5em;
-    }
-    nav {
-      background-color: #1a1a1a;
-      padding: 10px 0;
-      text-align: center;
-      border-bottom: 2px solid #FFD700;
-    }
-    nav a {
-      color: #FFD700;
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: bold;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    .section {
-      margin-top: 30px;
-      background: linear-gradient(to bottom right, #1a1a1a, #333);
-      border: 2px solid #FFD700;
-      box-shadow: 0 0 15px #FFD70088;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      text-align: center;
-    }
-    .matchup-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      flex-wrap: wrap;
-    }
-    .team {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 2px solid #FFD700;
-    }
-    .score {
-      font-size: 1.4em;
-      font-weight: bold;
-      color: #FFD700;
-    }
-    .label {
-      background-color: #FFD700;
-      color: #111;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: bold;
-      display: inline-block;
-      margin-bottom: 15px;
-      font-size: 1.2em;
-    }
-    .diff {
-      color: #ccc;
-      font-size: 0.9em;
-      margin-top: 5px;
-    }
-    .no-matchups {
-      color: #999;
-      font-size: 1em;
-      margin-top: 10px;
-    }
-    #footer {
-      margin: 40px 0;
-      font-size: 0.8em;
-      text-align: center;
-      color: #777;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Armchair Fantasy Experts</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #f1c40f;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+        }
+        header img {
+            max-width: 200px;
+        }
+        nav {
+            background-color: #222;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #f1c40f;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .content {
+            padding: 30px;
+            text-align: center;
+        }
+        footer {
+            background-color: #000;
+            color: #888;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <img src="logo.png" alt="Armchair Fantasy Experts Logo" style="max-width: 180px; margin: 20px auto; display: block;" />
-    <h1>🏈 Armchair Fantasy Experts</h1>
-  </header>
+    <header>
+        <img src="logo.png" alt="Armchair Fantasy Experts Logo">
+    </header>
 
-  <nav>
-    <a href="index.html">🏠 Home</a>
-    <a href="matchups.html">📊 Matchups</a>
-    <a href="trophies.html">🏆 Trophy Room</a>
-    <a href="nflscores.html">📺 Live NFL Scores</a>
-  </nav>
+    <nav>
+        <a href="schedule.html">📅 Schedule</a> |
+        <a href="hof.html">🏆 Hall of Fame</a> |
+        <a href="matchups.html">⚔️ Live Matchups</a> |
+        <a href="nflscores.html">🏈 Live NFL Scores</a>
+    </nav>
 
-  <div class="section" id="motw">
-    <div class="label">🏆 Matchup of the Week</div>
-    <div id="motw-content" class="no-matchups">Loading...</div>
-  </div>
+    <div class="content">
+        <h1>Welcome to Armchair Fantasy Experts</h1>
+        <p>Your home for elite fantasy football coverage, powered by RedZone-style recaps, AI chaos, and live game magic.</p>
+        <p>Check back weekly for matchup recaps, power rankings, and more.</p>
+    </div>
 
-  <div class="section" id="closest">
-    <div class="label">⚔️ Closest Matchup Right Now</div>
-    <div id="closest-content" class="no-matchups">Loading...</div>
-  </div>
-
-  <div id="footer">Built by the Commish | Armchair Fantasy Experts 2025</div>
-
-  <script>
-    const LEAGUE_ID = "1180761607557697536";
-
-    async function getData() {
-      try {
-        const weekRes = await fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}`);
-        const week = (await weekRes.json()).week;
-
-        const [matchups, rosters, users] = await Promise.all([
-          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/matchups/${week}`).then(res => res.json()),
-          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/rosters`).then(res => res.json()),
-          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/users`).then(res => res.json())
-        ]);
-
-        const getOwnerInfo = (rosterId) => {
-          const roster = rosters.find(r => r.roster_id === rosterId);
-          const user = users.find(u => u.user_id === roster.owner_id);
-          return {
-            name: user?.display_name || `Team ${rosterId}`,
-            avatar: user?.avatar
-              ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}`
-              : 'https://sleepercdn.com/images/v2/icons/avatar_default.png'
-          };
-        };
-
-        const matchupGroups = {};
-        for (const m of matchups) {
-          if (!matchupGroups[m.matchup_id]) matchupGroups[m.matchup_id] = [];
-          matchupGroups[m.matchup_id].push(m);
-        }
-
-        let motw = null;
-        let closest = null;
-        let maxCombined = 0;
-        let minDiff = Infinity;
-
-        for (const pair of Object.values(matchupGroups)) {
-          if (pair.length === 2) {
-            const a = pair[0], b = pair[1];
-            const total = a.points + b.points;
-            const diff = Math.abs(a.points - b.points);
-
-            if (total > maxCombined) {
-              maxCombined = total;
-              motw = [a, b];
-            }
-            if (diff < minDiff) {
-              minDiff = diff;
-              closest = [a, b];
-            }
-          }
-        }
-
-        const renderMatchup = ([a, b], containerId, showDiff = false) => {
-          const infoA = getOwnerInfo(a.roster_id);
-          const infoB = getOwnerInfo(b.roster_id);
-          const scoreA = a.points.toFixed(1);
-          const scoreB = b.points.toFixed(1);
-          const diffText = showDiff
-            ? `<div class="diff">🔍 Score difference: ${Math.abs(scoreA - scoreB).toFixed(1)} pts</div>`
-            : "";
-
-          document.getElementById(containerId).innerHTML = `
-            <div class="matchup-row" title="${infoA.name} vs ${infoB.name}">
-              <div class="team"><img src="${infoA.avatar}" class="avatar" title="${infoA.name}"><span>${infoA.name}</span></div>
-              <div class="score">${scoreA}</div>
-              <span>vs</span>
-              <div class="score">${scoreB}</div>
-              <div class="team"><span>${infoB.name}</span><img src="${infoB.avatar}" class="avatar" title="${infoB.name}"></div>
-            </div>
-            ${diffText}
-          `;
-        };
-
-        if (motw) {
-          renderMatchup(motw, "motw-content");
-        } else {
-          document.getElementById("motw-content").innerHTML = "📭 No matchups this week – enjoy the offseason!";
-        }
-
-        if (closest) {
-          renderMatchup(closest, "closest-content", true);
-        } else {
-          document.getElementById("closest-content").innerHTML = "📭 No matchups happening yet!";
-        }
-      } catch (err) {
-        document.getElementById("motw-content").innerHTML = "⚠️ Could not load matchup data.";
-        document.getElementById("closest-content").innerHTML = "";
-      }
-    }
-
-    getData();
-    setInterval(getData, 120000);
-  </script>
+    <footer>
+        &copy; 2025 Armchair Fantasy Experts. All rights reserved.
+    </footer>
 </body>
 </html>
