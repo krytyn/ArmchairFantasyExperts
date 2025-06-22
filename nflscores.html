@@ -15,11 +15,9 @@
       font-size: 2.5em;
       margin-bottom: 20px;
     }
-    iframe {
-      border: none;
-      width: 90%;
+    .scorestream-widget-container {
       max-width: 1200px;
-      height: 800px;
+      margin: 0 auto;
     }
     a {
       color: #FFD700;
@@ -37,7 +35,8 @@
 </head>
 <body>
   <h1>🏟️ Live NFL Scores</h1>
-  <iframe src="https://scorestream.com/embed/games/football/pro?layout=scoreboard&teams=true" title="Live NFL Scores from ScoreStream" allowfullscreen></iframe>
+  <div class="scorestream-widget-container" data-ss_widget_type="vertScoreboard" style="height:600px;" data-user-widget-id="65321"></div>
+  <script async="async" type="text/javascript" src="https://scorestream.com/apiJsCdn/widgets/embed.js"></script>
   <p><a href="index.html">← Back to Home</a></p>
   <footer>Built by the Commish | Armchair Fantasy Experts 2025</footer>
 </body>
