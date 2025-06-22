@@ -10,12 +10,32 @@
       color: #FFD700;
       font-family: Arial, sans-serif;
       margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #000;
       padding: 20px;
       text-align: center;
+      border-bottom: 2px solid #FFD700;
     }
-    h1 {
+    header h1 {
+      margin: 0;
       font-size: 2.5em;
-      margin-bottom: 10px;
+    }
+    nav {
+      background-color: #1a1a1a;
+      padding: 10px 0;
+      text-align: center;
+      border-bottom: 2px solid #FFD700;
+    }
+    nav a {
+      color: #FFD700;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
     }
     .section {
       margin-top: 30px;
@@ -27,6 +47,7 @@
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
+      text-align: center;
     }
     .matchup-row {
       display: flex;
@@ -66,38 +87,39 @@
       font-size: 0.9em;
       margin-top: 5px;
     }
-    a {
-      color: #FFD700;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    #footer {
-      margin-top: 40px;
-      font-size: 0.8em;
-      color: #777;
-    }
     .no-matchups {
       color: #999;
       font-size: 1em;
       margin-top: 10px;
     }
+    #footer {
+      margin: 40px 0;
+      font-size: 0.8em;
+      text-align: center;
+      color: #777;
+    }
   </style>
 </head>
 <body>
-  <h1>🏈 Armchair Fantasy Experts</h1>
+  <header>
+    <h1>🏈 Armchair Fantasy Experts</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">🏠 Home</a>
+    <a href="matchups.html">📊 Matchups</a>
+    <a href="trophies.html">🏆 Trophy Room</a>
+    <a href="nflscores.html">📺 Live NFL Scores</a>
+  </nav>
+
   <div class="section" id="motw">
     <div class="label">🏆 Matchup of the Week</div>
     <div id="motw-content" class="no-matchups">Loading...</div>
   </div>
+
   <div class="section" id="closest">
     <div class="label">⚔️ Closest Matchup Right Now</div>
     <div id="closest-content" class="no-matchups">Loading...</div>
-  </div>
-
-  <div style="margin-top: 30px;">
-    <a href="matchups.html">📊 View All Live Matchups</a>
   </div>
 
   <div id="footer">Built by the Commish | Armchair Fantasy Experts 2025</div>
