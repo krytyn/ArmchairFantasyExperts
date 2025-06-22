@@ -12,47 +12,65 @@
       text-align: center;
     }
     h1 {
-      color: #FFD700;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .matchup-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 30px;
     }
     .matchup {
-      margin: 20px auto;
-      padding: 20px;
       background-color: #222;
-      border-left: 5px solid #FFD700;
-      width: 90%;
-      max-width: 600px;
-      border-radius: 8px;
-      text-align: left;
+      border: 2px solid #FFD700;
+      border-radius: 10px;
+      padding: 20px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 30px;
+      max-width: 700px;
+      width: 100%;
+      justify-content: space-between;
     }
     .team {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-weight: bold;
-      font-size: 1.1em;
+      max-width: 40%;
     }
     .avatar {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       border: 2px solid #FFD700;
-      background-color: #000;
     }
     .score {
-      font-size: 1.2em;
+      font-size: 1.6em;
       font-weight: bold;
-      color: #FFD700;
-      min-width: 50px;
-      text-align: right;
+      min-width: 60px;
+      text-align: center;
+    }
+    .score.winning {
+      background-color: #2e8b57;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+    .score.losing {
+      color: #888;
+    }
+    .vs {
+      font-size: 1.2em;
+      color: #999;
+      margin: 0 10px;
     }
     a {
       color: #FFD700;
       text-decoration: none;
-      display: inline-block;
       margin-top: 20px;
+      display: inline-block;
     }
     a:hover {
       text-decoration: underline;
@@ -65,11 +83,9 @@
   </style>
 </head>
 <body>
-  <h1>📊 Live Fantasy Matchups – Week <span id="week-num"></span></h1>
-  <div id="matchups">Loading matchups...</div>
-
+  <h1>📊 ESPN-Style Matchups – Week <span id="week-num"></span></h1>
+  <div class="matchup-container" id="matchups">Loading matchups...</div>
   <a href="index.html">← Back to Home</a>
-
   <div id="footer">Built by the Commish | Armchair Fantasy Experts 2025</div>
 
   <script>
@@ -134,17 +150,21 @@
           const scoreA = pair[0].points.toFixed(1);
           const scoreB = pair[1].points.toFixed(1);
 
+          const scoreAClass = scoreA > scoreB ? "score winning" : "score losing";
+          const scoreBClass = scoreB > scoreA ? "score winning" : "score losing";
+
           container.innerHTML += `
             <div class="matchup">
               <div class="team">
-                <img src="${teamA.avatar}" alt="Avatar A" class="avatar">
+                <img src="${teamA.avatar}" class="avatar" alt="A">
                 <span>${teamA.name}</span>
               </div>
-              <div class="score">${scoreA}</div>
-              <div class="score">${scoreB}</div>
+              <div class="${scoreAClass}">${scoreA}</div>
+              <div class="vs">vs</div>
+              <div class="${scoreBClass}">${scoreB}</div>
               <div class="team">
                 <span>${teamB.name}</span>
-                <img src="${teamB.avatar}" alt="Avatar B" class="avatar">
+                <img src="${teamB.avatar}" class="avatar" alt="B">
               </div>
             </div>
           `;
@@ -153,7 +173,7 @@
     }
 
     displayMatchups();
-    setInterval(displayMatchups, 120000); // refresh every 2 minutes
+    setInterval(displayMatchups, 120000); // refresh every 2 mins
   </script>
 </body>
 </html>
