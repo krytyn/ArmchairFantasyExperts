@@ -1,179 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Live Fantasy Matchups – Armchair Fantasy Experts</title>
+  <meta charset="UTF-8" />
+  <title>Live Matchups – Armchair Fantasy Experts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       background-color: #111;
       color: #FFD700;
       font-family: Arial, sans-serif;
+      margin: 0;
       padding: 20px;
       text-align: center;
     }
     h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-    }
-    .matchup-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 30px;
+      font-size: 2em;
     }
     .matchup {
       background-color: #222;
-      border: 2px solid #FFD700;
-      border-radius: 10px;
+      margin: 20px auto;
       padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 30px;
-      max-width: 700px;
-      width: 100%;
-      justify-content: space-between;
+      border-radius: 10px;
+      border-left: 5px solid #FFD700;
+      max-width: 600px;
     }
     .team {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+    .name {
+      display: flex;
+      align-items: center;
       gap: 10px;
-      max-width: 40%;
     }
     .avatar {
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       border: 2px solid #FFD700;
     }
     .score {
-      font-size: 1.6em;
       font-weight: bold;
-      min-width: 60px;
-      text-align: center;
+      font-size: 1.3em;
     }
-    .score.winning {
-      background-color: #2e8b57;
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 8px;
-    }
-    .score.losing {
+    .no-matchups {
       color: #888;
-    }
-    .vs {
-      font-size: 1.2em;
-      color: #999;
-      margin: 0 10px;
+      margin-top: 30px;
+      font-size: 1.1em;
     }
     a {
       color: #FFD700;
       text-decoration: none;
-      margin-top: 20px;
-      display: inline-block;
     }
     a:hover {
       text-decoration: underline;
     }
-    #footer {
-      margin-top: 40px;
-      font-size: 0.8em;
-      color: #777;
-    }
   </style>
 </head>
 <body>
-  <h1>📊 ESPN-Style Matchups – Week <span id="week-num"></span></h1>
-  <div class="matchup-container" id="matchups">Loading matchups...</div>
-  <a href="index.html">← Back to Home</a>
-  <div id="footer">Built by the Commish | Armchair Fantasy Experts 2025</div>
+  <h1>📊 Live Matchups – Armchair Fantasy Experts</h1>
+  <div id="matchups-container">Loading matchups...</div>
+  <div style="margin-top: 30px;">
+    <a href="index.html">🏠 Back to Homepage</a>
+  </div>
 
   <script>
-    const LEAGUE_ID = '1180761607557697536';
+    const LEAGUE_ID = "1180761607557697536";
 
-    async function getCurrentWeek() {
-      const res = await fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}`);
-      const data = await res.json();
-      return data.week;
-    }
+    async function loadMatchups() {
+      try {
+        const leagueRes = await fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}`);
+        const week = (await leagueRes.json()).week;
 
-    async function getMatchups(week) {
-      const res = await fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/matchups/${week}`);
-      return res.json();
-    }
+        const [matchups, rosters, users] = await Promise.all([
+          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/matchups/${week}`).then(res => res.json()),
+          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/rosters`).then(res => res.json()),
+          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/users`).then(res => res.json())
+        ]);
 
-    async function getRosters() {
-      const res = await fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/rosters`);
-      return res.json();
-    }
-
-    async function getUsers() {
-      const res = await fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/users`);
-      return res.json();
-    }
-
-    function getOwnerInfo(rosterId, users, rosters) {
-      const roster = rosters.find(r => r.roster_id === rosterId);
-      const user = users.find(u => u.user_id === roster.owner_id);
-      return {
-        name: user?.display_name || `Team ${rosterId}`,
-        avatar: user?.avatar
-          ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}`
-          : 'https://sleepercdn.com/images/v2/icons/avatar_default.png'
-      };
-    }
-
-    async function displayMatchups() {
-      const week = await getCurrentWeek();
-      document.getElementById("week-num").innerText = week;
-
-      const [matchups, rosters, users] = await Promise.all([
-        getMatchups(week),
-        getRosters(),
-        getUsers()
-      ]);
-
-      const container = document.getElementById("matchups");
-      container.innerHTML = "";
-
-      const matchupsGrouped = {};
-
-      for (const m of matchups) {
-        if (!matchupsGrouped[m.matchup_id]) matchupsGrouped[m.matchup_id] = [];
-        matchupsGrouped[m.matchup_id].push(m);
-      }
-
-      Object.values(matchupsGrouped).forEach(pair => {
-        if (pair.length === 2) {
-          const teamA = getOwnerInfo(pair[0].roster_id, users, rosters);
-          const teamB = getOwnerInfo(pair[1].roster_id, users, rosters);
-          const scoreA = pair[0].points.toFixed(1);
-          const scoreB = pair[1].points.toFixed(1);
-
-          const scoreAClass = scoreA > scoreB ? "score winning" : "score losing";
-          const scoreBClass = scoreB > scoreA ? "score winning" : "score losing";
-
-          container.innerHTML += `
-            <div class="matchup">
-              <div class="team">
-                <img src="${teamA.avatar}" class="avatar" alt="A">
-                <span>${teamA.name}</span>
-              </div>
-              <div class="${scoreAClass}">${scoreA}</div>
-              <div class="vs">vs</div>
-              <div class="${scoreBClass}">${scoreB}</div>
-              <div class="team">
-                <span>${teamB.name}</span>
-                <img src="${teamB.avatar}" class="avatar" alt="B">
-              </div>
-            </div>
-          `;
+        if (!matchups || matchups.length === 0) {
+          document.getElementById("matchups-container").innerHTML = "<div class='no-matchups'>📭 No matchups available right now – check back soon!</div>";
+          return;
         }
-      });
+
+        const getUser = (rosterId) => {
+          const roster = rosters.find(r => r.roster_id === rosterId);
+          const user = users.find(u => u.user_id === roster.owner_id);
+          return {
+            name: user?.display_name || `Team ${rosterId}`,
+            avatar: user?.avatar
+              ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}`
+              : 'https://sleepercdn.com/images/v2/icons/avatar_default.png'
+          };
+        };
+
+        const grouped = {};
+        for (let m of matchups) {
+          if (!grouped[m.matchup_id]) grouped[m.matchup_id] = [];
+          grouped[m.matchup_id].push(m);
+        }
+
+        const container = document.getElementById("matchups-container");
+        container.innerHTML = "";
+
+        for (const group of Object.values(grouped)) {
+          if (group.length === 2) {
+            const [a, b] = group;
+            const aUser = getUser(a.roster_id);
+            const bUser = getUser(b.roster_id);
+            container.innerHTML += `
+              <div class="matchup">
+                <div class="team">
+                  <div class="name"><img src="${aUser.avatar}" class="avatar"><span>${aUser.name}</span></div>
+                  <div class="score">${a.points.toFixed(1)}</div>
+                </div>
+                <div class="team">
+                  <div class="name"><img src="${bUser.avatar}" class="avatar"><span>${bUser.name}</span></div>
+                  <div class="score">${b.points.toFixed(1)}</div>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        if (container.innerHTML.trim() === "") {
+          container.innerHTML = "<div class='no-matchups'>📭 No full matchups found this week.</div>";
+        }
+      } catch (err) {
+        document.getElementById("matchups-container").innerHTML = "<div class='no-matchups'>⚠️ Error loading matchups.</div>";
+      }
     }
 
-    displayMatchups();
-    setInterval(displayMatchups, 120000); // refresh every 2 mins
+    loadMatchups();
+    setInterval(loadMatchups, 120000);
   </script>
 </body>
 </html>

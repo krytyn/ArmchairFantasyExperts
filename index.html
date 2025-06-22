@@ -1,51 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Armchair Fantasy Experts – Home</title>
+  <meta charset="UTF-8" />
+  <title>Armchair Fantasy Experts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       background-color: #111;
       color: #FFD700;
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
       text-align: center;
-      padding: 40px;
     }
     h1 {
-      font-size: 3em;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .section {
+      margin-top: 30px;
+      background-color: #222;
+      border-left: 5px solid #FFD700;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .matchup-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+    }
+    .team {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #FFD700;
+    }
+    .score {
+      font-size: 1.4em;
+      font-weight: bold;
       color: #FFD700;
     }
-    .link-block {
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #222;
-      width: 80%;
-      max-width: 600px;
-      border-radius: 10px;
+    .label {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    .diff {
+      color: #ccc;
+      font-size: 0.9em;
+      margin-top: 5px;
     }
     a {
       color: #FFD700;
-      font-size: 1.2em;
       text-decoration: none;
     }
     a:hover {
       text-decoration: underline;
     }
+    #footer {
+      margin-top: 40px;
+      font-size: 0.8em;
+      color: #777;
+    }
+    .no-matchups {
+      color: #999;
+      font-size: 1em;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <h1>🏆 Armchair Fantasy Experts</h1>
-  <p>Welcome to the official league hub for weekly newsletters, matchups, and more!</p>
-
-  <div class="link-block">
-    <p><a href="matchups.html">📊 View Live Fantasy Matchups</a></p>
-    <p><a href="nflscores.html">🏟️ View Live NFL Scores</a></p>
-    <p><a href="archive.html">🗂️ Visit the Newsletter Archive</a></p>
-    <p><a href="trophyroom.html">🥇 View the Trophy Room</a></p>
+  <h1>🏈 Armchair Fantasy Experts</h1>
+  <div class="section" id="motw">
+    <div class="label">🏆 Matchup of the Week</div>
+    <div id="motw-content" class="no-matchups">Loading...</div>
+  </div>
+  <div class="section" id="closest">
+    <div class="label">⚔️ Closest Matchup Right Now</div>
+    <div id="closest-content" class="no-matchups">Loading...</div>
   </div>
 
-  <footer style="margin-top: 40px; font-size: 0.8em; color: #777;">
-    Built by the Commish | Armchair Fantasy Experts 2025
-  </footer>
+  <div style="margin-top: 30px;">
+    <a href="matchups.html">📊 View All Live Matchups</a>
+  </div>
+
+  <div id="footer">Built by the Commish | Armchair Fantasy Experts 2025</div>
+
+  <script>
+    const LEAGUE_ID = "1180761607557697536";
+
+    async function getData() {
+      try {
+        const weekRes = await fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}`);
+        const week = (await weekRes.json()).week;
+
+        const [matchups, rosters, users] = await Promise.all([
+          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/matchups/${week}`).then(res => res.json()),
+          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/rosters`).then(res => res.json()),
+          fetch(`https://api.sleeper.app/v1/league/${LEAGUE_ID}/users`).then(res => res.json())
+        ]);
+
+        const getOwnerInfo = (rosterId) => {
+          const roster = rosters.find(r => r.roster_id === rosterId);
+          const user = users.find(u => u.user_id === roster.owner_id);
+          return {
+            name: user?.display_name || `Team ${rosterId}`,
+            avatar: user?.avatar
+              ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}`
+              : 'https://sleepercdn.com/images/v2/icons/avatar_default.png'
+          };
+        };
+
+        const matchupGroups = {};
+        for (const m of matchups) {
+          if (!matchupGroups[m.matchup_id]) matchupGroups[m.matchup_id] = [];
+          matchupGroups[m.matchup_id].push(m);
+        }
+
+        let motw = null;
+        let closest = null;
+        let maxCombined = 0;
+        let minDiff = Infinity;
+
+        for (const pair of Object.values(matchupGroups)) {
+          if (pair.length === 2) {
+            const a = pair[0], b = pair[1];
+            const total = a.points + b.points;
+            const diff = Math.abs(a.points - b.points);
+
+            if (total > maxCombined) {
+              maxCombined = total;
+              motw = [a, b];
+            }
+            if (diff < minDiff) {
+              minDiff = diff;
+              closest = [a, b];
+            }
+          }
+        }
+
+        const renderMatchup = ([a, b], containerId, showDiff = false) => {
+          const infoA = getOwnerInfo(a.roster_id);
+          const infoB = getOwnerInfo(b.roster_id);
+          const scoreA = a.points.toFixed(1);
+          const scoreB = b.points.toFixed(1);
+          const diffText = showDiff ? `<div class="diff">Difference: ${Math.abs(scoreA - scoreB).toFixed(1)} pts</div>` : "";
+
+          document.getElementById(containerId).innerHTML = `
+            <div class="matchup-row">
+              <div class="team"><img src="${infoA.avatar}" class="avatar"><span>${infoA.name}</span></div>
+              <div class="score">${scoreA}</div>
+              <span>vs</span>
+              <div class="score">${scoreB}</div>
+              <div class="team"><span>${infoB.name}</span><img src="${infoB.avatar}" class="avatar"></div>
+            </div>
+            ${diffText}
+          `;
+        };
+
+        if (motw) {
+          renderMatchup(motw, "motw-content");
+        } else {
+          document.getElementById("motw-content").innerHTML = "📭 No matchups this week – enjoy the offseason!";
+        }
+
+        if (closest) {
+          renderMatchup(closest, "closest-content", true);
+        } else {
+          document.getElementById("closest-content").innerHTML = "📭 No matchups happening yet!";
+        }
+      } catch (err) {
+        document.getElementById("motw-content").innerHTML = "⚠️ Could not load matchup data.";
+        document.getElementById("closest-content").innerHTML = "";
+      }
+    }
+
+    getData();
+    setInterval(getData, 120000); // update every 2 mins
+  </script>
 </body>
 </html>
