@@ -19,10 +19,11 @@
     }
     .section {
       margin-top: 30px;
-      background-color: #222;
-      border-left: 5px solid #FFD700;
+      background: linear-gradient(to bottom right, #1a1a1a, #333);
+      border: 2px solid #FFD700;
+      box-shadow: 0 0 15px #FFD70088;
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 12px;
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
@@ -32,6 +33,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 10px 0;
+      flex-wrap: wrap;
     }
     .team {
       display: flex;
@@ -39,8 +41,8 @@
       gap: 10px;
     }
     .avatar {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       border: 2px solid #FFD700;
     }
@@ -50,9 +52,14 @@
       color: #FFD700;
     }
     .label {
+      background-color: #FFD700;
+      color: #111;
+      padding: 6px 12px;
+      border-radius: 20px;
       font-weight: bold;
+      display: inline-block;
+      margin-bottom: 15px;
       font-size: 1.2em;
-      margin-bottom: 10px;
     }
     .diff {
       color: #ccc;
@@ -153,15 +160,17 @@
           const infoB = getOwnerInfo(b.roster_id);
           const scoreA = a.points.toFixed(1);
           const scoreB = b.points.toFixed(1);
-          const diffText = showDiff ? `<div class="diff">Difference: ${Math.abs(scoreA - scoreB).toFixed(1)} pts</div>` : "";
+          const diffText = showDiff
+            ? `<div class="diff">🔍 Score difference: ${Math.abs(scoreA - scoreB).toFixed(1)} pts</div>`
+            : "";
 
           document.getElementById(containerId).innerHTML = `
-            <div class="matchup-row">
-              <div class="team"><img src="${infoA.avatar}" class="avatar"><span>${infoA.name}</span></div>
+            <div class="matchup-row" title="${infoA.name} vs ${infoB.name}">
+              <div class="team"><img src="${infoA.avatar}" class="avatar" title="${infoA.name}"><span>${infoA.name}</span></div>
               <div class="score">${scoreA}</div>
               <span>vs</span>
               <div class="score">${scoreB}</div>
-              <div class="team"><span>${infoB.name}</span><img src="${infoB.avatar}" class="avatar"></div>
+              <div class="team"><span>${infoB.name}</span><img src="${infoB.avatar}" class="avatar" title="${infoB.name}"></div>
             </div>
             ${diffText}
           `;
@@ -185,7 +194,7 @@
     }
 
     getData();
-    setInterval(getData, 120000); // update every 2 mins
+    setInterval(getData, 120000);
   </script>
 </body>
 </html>
