@@ -9,15 +9,59 @@
       color: #FFD700;
       font-family: Arial, sans-serif;
       text-align: center;
-      padding: 40px;
+      padding: 40px 20px;
     }
     h1 {
       font-size: 2.5em;
+      margin-bottom: 10px;
+      color: #FFD700;
+    }
+    .subtitle {
+      font-style: italic;
+      color: #ccc;
       margin-bottom: 20px;
     }
+    .live-banner {
+      background: #FFD700;
+      color: #111;
+      display: inline-block;
+      padding: 6px 18px;
+      font-weight: bold;
+      border-radius: 20px;
+      animation: pulse 1.5s infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,215,0, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(255,215,0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,215,0, 0); }
+    }
     .scorestream-widget-container {
+      border: 2px solid #FFD700;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #FFD70080;
+      padding: 10px;
+      background-color: #00000066;
       max-width: 1200px;
-      margin: 0 auto;
+      margin: 0 auto 30px auto;
+    }
+    iframe, .scorestream-widget-container {
+      width: 100%;
+      height: auto;
+    }
+    button {
+      background-color: #FFD700;
+      border: none;
+      padding: 10px 20px;
+      color: #111;
+      font-weight: bold;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 30px;
+    }
+    button:hover {
+      background-color: #e6c200;
     }
     a {
       color: #FFD700;
@@ -35,8 +79,14 @@
 </head>
 <body>
   <h1>🏟️ Live NFL Scores</h1>
+  <div class="live-banner">🔴 LIVE NOW</div>
+  <p class="subtitle">Track the scores that determine your fate...</p>
+
   <div class="scorestream-widget-container" data-ss_widget_type="vertScoreboard" style="height:600px;" data-user-widget-id="65321"></div>
   <script async="async" type="text/javascript" src="https://scorestream.com/apiJsCdn/widgets/embed.js"></script>
+
+  <button onclick="location.reload()">🔄 Refresh Scores</button>
+
   <p><a href="index.html">← Back to Home</a></p>
   <footer>Built by the Commish | Armchair Fantasy Experts 2025</footer>
 </body>
